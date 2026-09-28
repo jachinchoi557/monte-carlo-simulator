@@ -3,28 +3,30 @@ import math
 import statistics
 
 
-def run_strategy(principal, sim_num, runs_per_sim, win_percentage):
+def run_strategy(principal, sim_num, runs_per_sim, win_percentage, risk):
     results = []
     max_drawdowns = []
     bankruptcy = []
 
     for simulation_index in range(sim_num):
-        money = principal
+        money = principal 
         highest_value = money
         highest_drawdown = 0
+        
 
         for trial_index in range(runs_per_sim):
+            risk_amt = risk * money
             sim = random.random()
 
             if sim < win_percentage:
-                money += 10
+                money += risk_amt
             else:
-                money -= 10
+                money -= risk_amt 
 
             if money >= highest_value:
                 highest_value = money
 
-            elif money <= 0:
+            elif money < 0.01 * principal:
                 highest_drawdown = 100
                 bankruptcy.append(simulation_index + 1)
                 break
@@ -84,7 +86,8 @@ def run_strategy(principal, sim_num, runs_per_sim, win_percentage):
         "bankruptcy": bankruptcy,
         "sim_num": sim_num,
         "runs_per_sim": runs_per_sim,
-        "win_percentage": win_percentage
+        "win_percentage": win_percentage,
+        "risk": risk 
     }
 
     return strategy_stats
@@ -100,26 +103,33 @@ strategy_count = int(
 
 strategies = []
 
-for strategy_index in range(strategy_count):
-    print(f"\nStrategy #{strategy_index + 1}")
-
-    sim_num = int(
+sim_num = int(
         input("How many simulations shall we run? ")
     )
 
-    runs_per_sim = int(
+runs_per_sim = int(
         input("How many runs should each simulation run? ")
     )
 
+
+for strategy_index in range(strategy_count):
+    print(f"\nStrategy #{strategy_index + 1}")
+
+    
     win_percentage = float(
         input("What is the win percentage? ")
+    ) / 100
+
+    risk = float(
+        input("What percent of the principal will be risked? ")
     ) / 100
 
     strategy_stats = run_strategy(
         principal,
         sim_num,
         runs_per_sim,
-        win_percentage
+        win_percentage,
+        risk 
     )
 
     strategies.append(strategy_stats)
