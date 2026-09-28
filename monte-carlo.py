@@ -43,8 +43,8 @@ for k in range(strategy):
                 drawdown = (highest_value - money) / highest_value * 100
                 if drawdown > highest_drawdown:
                     highest_drawdown = drawdown 
-        results.append(money)
-        max_drawdowns.append(highest_drawdown)
+    results.append(money)
+    max_drawdowns.append(highest_drawdown)
     #Basic Stats
     mean = sum(results)/len(results)
     std = math.sqrt(sum((x - mean) ** 2 for x in results) / len(results))
@@ -69,20 +69,16 @@ for k in range(strategy):
     worst_sim_loss = abs(worst_sim) - principal
     best_sim_profit_percentage = best_sim_profit / principal * 100
     worst_sim_loss_percentage = worst_sim_loss / principal * 100
+    worst_drawdown = max(max_drawdowns)
     bankrupt_list = ", #".join(str(n) for n in bankruptcy)
+    strat_bankrupt.append(bankrupt_list)
 
     
 
 
     #print basic stats
     print(f"Strategy {j+1}: , Median: {median}, Mean:{mean}, Std:{std: .2f}")
-    for i in range(len(profit)):
-        if profit[i] > 0:
-            print(f"\tSimulation {i+1}: , Profit:{profit[i]}, Max Drawdown:{max_drawdowns[i]: .3g}%")
-        elif profit[i] < 0:
-            print(f"\tSimulation {i+1}: , Loss:{profit[i]}, Max Drawdown:{max_drawdowns[i]: .3g}%")
-        elif profit[i] == 0:
-            print(f"\tSimulation {i+1}: , Break Even:{profit[i]}, Max Drawdown:{max_drawdowns[i]: .3g}%")
+    print(f"Highest drawdown: #{max_drawdowns.index(worst_drawdown) + 1}, {worst_drawdown}")
     #print stats on best/worst sims
     print(f"Best Simulation: #{best_sim_num}, Profit: {best_sim_profit}, Profit Percentage:{best_sim_profit_percentage: .0f}%")
     print(f"Bankrupt Simulations: #{bankrupt_list},\n")
