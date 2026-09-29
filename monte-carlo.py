@@ -3,7 +3,7 @@ import math
 import statistics
 
 
-def run_strategy(principal, sim_num, runs_per_sim, win_percentage, risk):
+def run_strategy(principal, sim_num, runs_per_sim, win_percentage, risk, stop_loss):
     results = []
     max_drawdowns = []
     bankruptcy = []
@@ -26,7 +26,7 @@ def run_strategy(principal, sim_num, runs_per_sim, win_percentage, risk):
             if money >= highest_value:
                 highest_value = money
 
-            elif money < 0.01 * principal:
+            elif money < stop_loss * principal:
                 highest_drawdown = 100
                 bankruptcy.append(simulation_index + 1)
                 break
@@ -62,11 +62,9 @@ def run_strategy(principal, sim_num, runs_per_sim, win_percentage, risk):
     best_sim_num = results.index(best_sim) + 1
     worst_sim_num = results.index(worst_sim) + 1
 
-    best_sim_profit = best_sim - principal
-    worst_sim_loss = abs(worst_sim - principal)
-
-    best_sim_profit_percentage = best_sim_profit / principal * 100
-    worst_sim_loss_percentage = worst_sim_loss / principal * 100
+    
+    best_sim_profit_return = (best_sim - principal) / principal * 100
+    worst_sim_loss_return = (worst_sim - principal) / principal * 100
 
     worst_drawdown = max(max_drawdowns)
 
@@ -76,18 +74,19 @@ def run_strategy(principal, sim_num, runs_per_sim, win_percentage, risk):
         "std": std,
         "avg_profit": avg_profit,
         "avg_return": avg_return,
-        "best_sim": best_sim_num,
-        "best_profit": best_sim_profit,
-        "best_profit_percentage": best_sim_profit_percentage,
-        "worst_sim": worst_sim_num,
-        "worst_loss": worst_sim_loss,
-        "worst_loss_percentage": worst_sim_loss_percentage,
+        "best_sim_num": best_sim_num,
+        "best_sim": best_sim,
+        "best_profit_return": best_sim_profit_return,
+        "worst_sim_num": worst_sim_num,
+        "worst_sim": worst_sim,
+        "worst_loss_return": worst_sim_loss_return,
         "worst_drawdown": worst_drawdown,
         "bankruptcy": bankruptcy,
         "sim_num": sim_num,
         "runs_per_sim": runs_per_sim,
         "win_percentage": win_percentage,
-        "risk": risk 
+        "risk": risk, 
+        "stop_loss": stop_loss
     }
 
     return strategy_stats
@@ -124,12 +123,17 @@ for strategy_index in range(strategy_count):
         input("What percent of the principal will be risked? ")
     ) / 100
 
+    stop_loss = float(
+        input("What percent of the principal will be considered the stop-loss? ")
+    ) / 100
+
     strategy_stats = run_strategy(
         principal,
         sim_num,
         runs_per_sim,
         win_percentage,
-        risk 
+        risk,
+        stop_loss 
     )
 
     strategies.append(strategy_stats)
@@ -143,30 +147,30 @@ for strategy_index in range(len(strategies)):
     print(f"\nStrategy #{strategy_index + 1}")
     print("--------------------------------------")
 
-    print(f"Mean: {stats['mean']:.2f}")
-    print(f"Median: {stats['median']:.2f}")
-    print(f"Std: {stats['std']:.2f}")
+    print(f"Mean: {stats['mean']:,.2f}")
+    print(f"Median: {stats['median']:,.2f}")
+    print(f"Std: {stats['std']:,.2f}")
 
-    print(f"Average Profit: {stats['avg_profit']:.2f}")
-    print(f"Average Return: {stats['avg_return']:.2f}%")
+    print(f"Average Profit: {stats['avg_profit']:,.2f}")
+    print(f"Average Return: {stats['avg_return']:,.2f}%")
 
     print(
-        f"Best Simulation: #{stats['best_sim']}, "
-        f"Profit: {stats['best_profit']:.2f}, "
-        f"Return: {stats['best_profit_percentage']:.2f}%"
+        f"Best Simulation: #{stats['best_sim_num']}, "
+        f"End value: {stats['best_sim']:,.2f}, "
+        f"Return: {stats['best_profit_return']:,.2f}%"
     )
 
     print(
-        f"Worst Simulation: #{stats['worst_sim']}, "
-        f"Loss: {stats['worst_loss']:.2f}, "
-        f"Loss Percentage: {stats['worst_loss_percentage']:.2f}%"
+        f"Worst Simulation: #{stats['worst_sim_num']}, "
+        f"End value: {stats['worst_sim']:,.2f}, "
+        f"Loss Percentage: {stats['worst_loss_return']:,.2f}%"
     )
 
     print(
-        f"Worst Max Drawdown: {stats['worst_drawdown']:.2f}%"
+        f"Worst Max Drawdown: {stats['worst_drawdown']:,.2f}%"
     )
 
     print(
-        f"Bankrupt Simulations: "
+        f"Stop-out Simulations: "
         f"{len(stats['bankruptcy'])}/{stats['sim_num']}"
     )
