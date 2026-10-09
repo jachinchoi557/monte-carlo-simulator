@@ -26,11 +26,10 @@ def run_strategy(principal, sim_num, runs_per_sim, win_percentage, risk, stop_lo
             if money >= highest_value:
                 highest_value = money
 
-            elif money < stop_loss * principal:
+            elif money < (1 - stop_loss) * principal:
                 highest_drawdown = 100
                 bankruptcy.append(simulation_index + 1)
                 break
-
             else:
                 drawdown = (highest_value - money) / highest_value * 100
 
